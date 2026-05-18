@@ -1,0 +1,107 @@
+export default function NumberInput({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder = '0',
+  hint,
+  note,
+  required = false,
+  max,
+  prefix = '₹',
+  error,
+}) {
+  function formatINR(val) {
+    if (val === '' || val === null || val === undefined) return ''
+    const num = Number(val)
+    if (!num) return ''
+    return num.toLocaleString('en-IN')
+  }
+
+  function handleChange(e) {
+    const raw = e.target.value.replace(/[^0-9]/g, '')
+    if (raw === '') {
+      onChange('')
+      return
+    }
+    const num = Number(raw)
+    if (max && num > max) {
+      onChange(max)
+      return
+    }
+    onChange(num)
+  }
+
+  const isValid =
+    value !== '' && value !== null && value !== undefined && Number(value) > 0
+  const hasPrefix = Boolean(prefix)
+  const inputPadding = hasPrefix ? 'pl-8 pr-9' : 'px-3'
+  const stateClasses = error
+    ? 'border-red-300 bg-red-50/30'
+    : isValid
+      ? 'border-green-300 bg-green-50/30'
+      : 'border-gray-200'
+
+  return (
+    <div className="space-y-1.5">
+      {label && (
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+          {label}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+      )}
+
+      <div className="relative rounded-xl">
+        {hasPrefix && (
+          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm font-medium">
+            {prefix}
+          </span>
+        )}
+        <input
+          id={id}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={formatINR(value)}
+          onChange={handleChange}
+          placeholder={placeholder}
+          aria-describedby={hint ? `${id}-hint` : undefined}
+          aria-invalid={error ? 'true' : undefined}
+          className={`block w-full rounded-xl border ${inputPadding} py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none placeholder:text-gray-400 ${stateClasses}`}
+        />
+        {isValid && !error && (
+          <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg
+              className="w-4 h-4 text-green-500"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+        )}
+      </div>
+
+      {note && (
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1">
+          {note}
+        </p>
+      )}
+
+      {hint && (
+        <p id={`${id}-hint`} className="text-xs text-gray-500">
+          {hint}
+        </p>
+      )}
+
+      {error && (
+        <p role="alert" className="text-xs text-red-600">
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
